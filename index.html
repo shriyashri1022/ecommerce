@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShopMate — Minimal E‑commerce Template</title>
+  <meta name="description" content="A clean, responsive single-file e‑commerce HTML template with built‑in CSS and a tiny bit of JS for filtering and a cart drawer." />
+  <style>
+    /* ------------------------------
+       Base / Reset
+    ------------------------------- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: #0f172a; /* slate-900 */
+      background: #f8fafc; /* slate-50 */
+      line-height: 1.5;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    :root {
+      --bg: #ffffff;
+      --muted: #e2e8f0; /* slate-300 */
+      --muted-2: #cbd5e1; /* slate-400 */
+      --text: #0f172a; /* slate-900 */
+      --text-2: #475569; /* slate-600 */
+      --brand: #2563eb; /* blue-600 */
+      --brand-2: #1d4ed8; /* blue-700 */
+      --accent: #16a34a; /* green-600 */
+      --danger: #ef4444; /* red-500 */
+      --shadow: 0 10px 20px rgba(2,6,23, .06), 0 3px 6px rgba(2,6,23, .08);
+      --radius: 16px;
+      --radius-sm: 12px;
+    }
+
+    /* ------------------------------
+       Utilities
+    ------------------------------- */
+    .container { width: min(1200px, 92%); margin-inline: auto; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .shadow { box-shadow: var(--shadow); }
+    .card { background: var(--bg); border-radius: var(--radius); }
+    .chip { display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--muted); border-radius: 999px; padding:.35rem .75rem; font-size:.85rem; color:var(--text-2); background:#fff; }
+
+    /* ------------------------------
+       Header / Nav
+    ------------------------------- */
+    header { position: sticky; top: 0; z-index: 40; background: rgba(255,255,255,.8); backdrop-filter: saturate(180%) blur(8px); border-bottom: 1px solid var(--muted); }
+    .nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: .75rem 0; }
+    .brand { display: flex; align-items: center; gap: .6rem; font-weight: 800; letter-spacing: .2px; }
+    .brand i { display:inline-grid; place-items:center; width:34px; height:34px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: white; font-style: normal; }
+    .nav-links { display:flex; gap: 1rem; justify-content:center; font-weight: 600; }
+    .nav-actions { display:flex; gap:.5rem; justify-content:flex-end; align-items:center; }
+    .search { display:flex; align-items:center; gap:.5rem; border:1px solid var(--muted); border-radius: 999px; padding: .5rem .75rem; background:#fff; }
+    .search input { border:0; outline:0; min-width: 140px; width: 100%; }
+    .icon-btn { display:inline-grid; place-items:center; width:40px; height:40px; border-radius: 999px; border:1px solid var(--muted); background:#fff; position:relative; }
+    .badge { position:absolute; top:-6px; right:-6px; background: var(--danger); color:#fff; font-size:.7rem; padding:.15rem .4rem; border-radius:999px; }
+
+    /* ------------------------------
+       Hero
+    ------------------------------- */
+    .hero { margin: 1.25rem 0 1.5rem; }
+    .hero .wrap { display:grid; grid-template-columns: 1.2fr .8fr; gap: 1rem; }
+    .hero-banner { border-radius: var(--radius); padding: 2rem; background: linear-gradient(120deg, #dbeafe, #e9d5ff 60%); min-height: 220px; display:grid; grid-template-columns: 1.1fr .9fr; align-items:center; }
+    .hero h1 { margin: 0 0 .25rem; font-size: clamp(1.6rem, 1.1rem + 2.5vw, 2.4rem); }
+    .hero p { color: var(--text-2); margin: 0 0 1rem; }
+    .hero .cta { display:flex; gap:.6rem; }
+    .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.7rem 1rem; border-radius: 12px; border:1px solid var(--muted); background:#fff; font-weight:700; }
+    .btn.primary { background: var(--brand); color:#fff; border-color: transparent; }
+    .btn.primary:hover { background: var(--brand-2); }
+    .tagline { display:flex; align-items:center; gap:.5rem; }
+
+    /* ------------------------------
+       Filters / Controls
+    ------------------------------- */
+    .controls { display:flex; flex-wrap: wrap; gap:.6rem; align-items:center; justify-content: space-between; margin: .5rem 0 1rem; }
+    .filters { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .select { border:1px solid var(--muted); border-radius:12px; padding:.55rem .7rem; background:#fff; }
+    .range { display:flex; align-items:center; gap:.6rem; }
+
+    /* ------------------------------
+       Products Grid
+    ------------------------------- */
+    .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .product { overflow: hidden; position:relative; transition: transform .15s ease; }
+    .product:hover { transform: translateY(-2px); }
+    .p-media { aspect-ratio: 1/1; background: #eef2ff; display:grid; place-items:center; position:relative; }
+    .p-media img { width: 100%; height: 100%; object-fit: cover; }
+    .p-body { padding: .85rem; display:grid; gap:.4rem; }
+    .p-title { font-weight: 700; }
+    .p-price { font-weight: 800; }
+    .p-meta { color: var(--text-2); font-size: .9rem; display:flex; align-items:center; gap:.5rem; }
+    .stars { --s:#f59e0b; display:inline-flex; gap:2px; }
+    .stars i { width: 14px; height: 14px; background: conic-gradient(var(--s) 0 72deg, #d1d5db 0 360deg); -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z\"/></svg>') center/contain no-repeat; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z\"/></svg>') center/contain no-repeat; }
+    .p-actions { display:flex; gap:.5rem; margin-top:.3rem; }
+
+    /* ------------------------------
+       Cart Drawer
+    ------------------------------- */
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(2,6,23,.4); opacity: 0; pointer-events: none; transition: .2s ease; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100dvh; width: min(380px, 92%); background: #fff; box-shadow: var(--shadow); transform: translateX(100%); transition: transform .25s ease; display: grid; grid-template-rows: auto 1fr auto; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer header, .drawer footer { padding: 1rem; border-bottom: 1px solid var(--muted); }
+    .drawer footer { border-top: 1px solid var(--muted); border-bottom: 0; }
+    .cart-items { padding: 1rem; overflow: auto; display: grid; gap: .85rem; }
+    .cart-item { display: grid; grid-template-columns: 64px 1fr auto; gap: .75rem; align-items: center; }
+    .qty { display:inline-flex; border:1px solid var(--muted); border-radius: 999px; overflow: hidden; }
+    .qty button { width: 28px; height: 28px; border:0; background:#fff; }
+    .qty input { width: 32px; border:0; text-align:center; }
+    .subtotal { display:flex; justify-content: space-between; margin:.5rem 0 1rem; font-weight: 800; }
+
+    /* ------------------------------
+       Footer
+    ------------------------------- */
+    footer.site { margin-top: 2rem; padding: 2rem 0; color: var(--text-2); border-top: 1px solid var(--muted); }
+    .footgrid { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; }
+    .footgrid h4 { margin: 0 0 .5rem; }
+
+    /* ------------------------------
+       Responsive
+    ------------------------------- */
+    @media (max-width: 900px) {
+      .nav { grid-template-columns: 1fr auto; grid-auto-rows: auto; align-items: start; gap:.5rem; }
+      .nav-links { grid-column: 1 / -1; order: 3; justify-content: flex-start; overflow:auto; }
+      .search { grid-column: 1 / -1; order: 2; }
+      .hero .wrap { grid-template-columns: 1fr; }
+      .hero-banner { grid-template-columns: 1fr; text-align:center; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .footgrid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header role="banner">
+    <div class="container nav">
+      <a class="brand" href="#" aria-label="ShopMate Home">
+        <i>🛍️</i>
+        <span>ShopMate</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#" class="chip">New</a>
+        <a href="#" class="chip">Men</a>
+        <a href="#" class="chip">Women</a>
+        <a href="#" class="chip">Accessories</a>
+        <a href="#" class="chip">Sale</a>
+      </nav>
+      <div class="nav-actions">
+        <label class="search" aria-label="Search products">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.3-4.3" stroke="#64748b" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#94a3b8" stroke-width="2"/></svg>
+          <input id="q" type="search" placeholder="Search products..." />
+        </label>
+        <button class="icon-btn" id="btnCart" aria-label="Open cart">
+          <span class="badge" id="cartCount" hidden>0</span>🧺
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container wrap">
+      <div class="hero-banner card shadow">
+        <div>
+          <div class="tagline"><span class="chip">Free shipping over $50</span> <span class="chip">30‑day returns</span></div>
+          <h1>Find your next favorite thing.</h1>
+          <p>Modern, minimal, and made to last. Explore curated picks across apparel, accessories, and home.</p>
+          <div class="cta">
+            <a href="#products" class="btn primary">Shop now →</a>
+            <a href="#" class="btn">Learn more</a>
+          </div>
+        </div>
+        <div aria-hidden="true">
+          <img src="https://images.unsplash.com/photo-1542293787938-c9e299b88054?q=80&w=1200&auto=format&fit=crop" alt="Lifestyle" style="border-radius: var(--radius-sm); aspect-ratio: 4/3; object-fit: cover;" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="container">
+    <div class="controls">
+      <div class="filters">
+        <select id="category" class="select" aria-label="Filter by category">
+          <option value="all">All categories</option>
+          <option value="apparel">Apparel</option>
+          <option value="shoes">Shoes</option>
+          <option value="accessories">Accessories</option>
+          <option value="home">Home</option>
+        </select>
+        <label class="range">Price <input id="price" type="range" min="0" max="200" value="200" /> <span id="priceVal" aria-live="polite">$200</span></label>
+      </div>
+      <div>
+        <select id="sort" class="select" aria-label="Sort products">
+          <option value="pop">Most popular</option>
+          <option value="asc">Price: Low → High</option>
+          <option value="desc">Price: High → Low</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <main class="container">
+    <div id="products" class="grid" aria-live="polite"></div>
+  </main>
+
+  <!-- Cart Drawer -->
+  <div class="drawer-backdrop" id="backdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Shopping cart" aria-hidden="true">
+    <header style="display:flex; justify-content: space-between; align-items:center;">
+      <strong>Your Cart</strong>
+      <button class="icon-btn" id="closeCart" aria-label="Close cart">✕</button>
+    </header>
+    <div class="cart-items" id="cartItems"></div>
+    <footer>
+      <div class="subtotal"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+      <button class="btn primary" style="width:100%;">Checkout</button>
+    </footer>
+  </aside>
+
+  <!-- Footer -->
+  <footer class="site">
+    <div class="container footgrid">
+      <div>
+        <h4>About ShopMate</h4>
+        <p>Your demo store for building great commerce experiences. Replace content, plug into your backend/API, and ship.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <ul style="padding:0; list-style:none; display:grid; gap:.35rem;">
+          <li><a href="#">New arrivals</a></li>
+          <li><a href="#">Best sellers</a></li>
+          <li><a href="#">Gift cards</a></li>
+          <li><a href="#">Sale</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <ul style="padding:0; list-style:none; display:grid; gap:.35rem;">
+          <li><a href="#">Help center</a></li>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul style="padding:0; list-style:none; display:grid; gap:.35rem;">
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ------- Demo Data
+    const PRODUCTS = [
+      { id: 1, title: "Everyday Tee", price: 24, category: "apparel", rating: 4.6, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1200&auto=format&fit=crop" },
+      { id: 2, title: "Canvas Sneakers", price: 59, category: "shoes", rating: 4.8, img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1200&auto=format&fit=crop" },
+      { id: 3, title: "Minimal Backpack", price: 78, category: "accessories", rating: 4.7, img: "https://images.unsplash.com/photo-1512303381-c56c0ccb8f8f?q=80&w=1200&auto=format&fit=crop" },
+      { id: 4, title: "Stoneware Mug", price: 18, category: "home", rating: 4.5, img: "https://images.unsplash.com/photo-1517705008128-361805f42e86?q=80&w=1200&auto=format&fit=crop" },
+      { id: 5, title: "Slim Chinos", price: 48, category: "apparel", rating: 4.3, img: "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1200&auto=format&fit=crop" },
+      { id: 6, title: "Leather Belt", price: 32, category: "accessories", rating: 4.2, img: "https://images.unsplash.com/photo-1618354691535-963cb7caa3a5?q=80&w=1200&auto=format&fit=crop" },
+      { id: 7, title: "Running Shoes", price: 89, category: "shoes", rating: 4.9, img: "https://images.unsplash.com/photo-1526403222173-6aa4f7c973cc?q=80&w=1200&auto=format&fit=crop" },
+      { id: 8, title: "Linen Shirt", price: 42, category: "apparel", rating: 4.4, img: "https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop" },
+      { id: 9, title: "Wool Throw", price: 64, category: "home", rating: 4.6, img: "https://images.unsplash.com/photo-1607582278043-c7cfb3a9a3e9?q=80&w=1200&auto=format&fit=crop" },
+      { id: 10, title: "Sunglasses", price: 36, category: "accessories", rating: 4.1, img: "https://images.unsplash.com/photo-1530915365347-3b8e62b1bb76?q=80&w=1200&auto=format&fit=crop" },
+      { id: 11, title: "Crew Socks (3‑pack)", price: 12, category: "apparel", rating: 4.0, img: "https://images.unsplash.com/photo-1593032580704-fbb5a9c9c20d?q=80&w=1200&auto=format&fit=crop" },
+      { id: 12, title: "Ceramic Vase", price: 28, category: "home", rating: 4.3, img: "https://images.unsplash.com/photo-1484101403633-562f891dc89a?q=80&w=1200&auto=format&fit=crop" }
+    ];
+
+    // ------- State
+    const state = {
+      q: "",
+      category: "all",
+      price: 200,
+      sort: "pop",
+      cart: [] // {id, qty}
+    };
+
+    // ------- Helpers
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+    const format = n => `$${n.toFixed(2)}`;
+
+    function renderProducts() {
+      const grid = $("#products");
+      const q = state.q.toLowerCase();
+      let list = PRODUCTS.filter(p => p.price <= state.price && (state.category === "all" || p.category === state.category) && p.title.toLowerCase().includes(q));
+      if (state.sort === "asc") list.sort((a,b) => a.price - b.price);
+      if (state.sort === "desc") list.sort((a,b) => b.price - a.price);
+      if (state.sort === "pop") list.sort((a,b) => b.rating - a.rating);
+
+      grid.innerHTML = list.map(p => `
+        <article class="product card shadow" data-id="${p.id}">
+          <div class="p-media"><img alt="${p.title}" src="${p.img}" loading="lazy"></div>
+          <div class="p-body">
+            <div class="p-title">${p.title}</div>
+            <div class="p-meta">
+              <span class="p-price">${format(p.price)}</span>
+              <span class="stars" aria-label="${p.rating} out of 5 stars" title="${p.rating} / 5">
+                ${"★★★★★".split("").map(_ => `<i></i>`).join("")}
+              </span>
+            </div>
+            <div class="p-actions">
+              <button class="btn" data-action="wish">♡ Wishlist</button>
+              <button class="btn primary" data-action="add">Add to cart</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function addToCart(id) {
+      const item = state.cart.find(i => i.id === id);
+      if (item) item.qty += 1; else state.cart.push({ id, qty: 1 });
+      updateCartUI();
+    }
+
+    function removeFromCart(id) {
+      state.cart = state.cart.filter(i => i.id !== id);
+      updateCartUI();
+    }
+
+    function setQty(id, qty) {
+      const item = state.cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, qty|0);
+      updateCartUI();
+    }
+
+    function cartSubtotal() {
+      return state.cart.reduce((sum, i) => {
+        const p = PRODUCTS.find(p => p.id === i.id);
+        return sum + (p.price * i.qty);
+      }, 0);
+    }
+
+    function updateCartUI() {
+      const count = state.cart.reduce((n,i) => n + i.qty, 0);
+      const badge = $("#cartCount");
+      if (count > 0) { badge.hidden = false; badge.textContent = count; } else { badge.hidden = true; }
+
+      const wrap = $("#cartItems");
+      if (!state.cart.length) {
+        wrap.innerHTML = `<p>Your cart is empty. Start adding your favorites!</p>`;
+      } else {
+        wrap.innerHTML = state.cart.map(i => {
+          const p = PRODUCTS.find(p => p.id === i.id);
+          return `
+            <div class="cart-item">
+              <img src="${p.img}" alt="${p.title}" style="width:64px; height:64px; object-fit:cover; border-radius:8px;">
+              <div>
+                <div style="font-weight:700;">${p.title}</div>
+                <div style="color:var(--text-2)">${format(p.price)}</div>
+                <div class="qty" role="group" aria-label="Change quantity">
+                  <button aria-label="Decrease quantity" data-action="dec" data-id="${p.id}">−</button>
+                  <input aria-label="Quantity" value="${i.qty}" inputmode="numeric" data-id="${p.id}" />
+                  <button aria-label="Increase quantity" data-action="inc" data-id="${p.id}">+</button>
+                </div>
+              </div>
+              <button class="icon-btn" aria-label="Remove from cart" data-action="remove" data-id="${p.id}">🗑️</button>
+            </div>`;
+        }).join("");
+      }
+
+      $("#subtotal").textContent = format(cartSubtotal());
+    }
+
+    // ------- Drawer controls
+    const drawer = $("#drawer");
+    const backdrop = $("#backdrop");
+    function openCart() { drawer.classList.add("open"); backdrop.classList.add("open"); drawer.setAttribute("aria-hidden", "false"); }
+    function closeCart() { drawer.classList.remove("open"); backdrop.classList.remove("open"); drawer.setAttribute("aria-hidden", "true"); }
+
+    // ------- Events
+    document.addEventListener("click", (e) => {
+      const t = e.target;
+      if (t.closest("#btnCart")) openCart();
+      if (t.closest("#closeCart") || t === backdrop) closeCart();
+
+      // Add to cart
+      const addBtn = t.closest('[data-action="add"]');
+      if (addBtn) {
+        const id = +addBtn.closest('.product').dataset.id;
+        addToCart(id);
+        openCart();
+      }
+
+      // Remove
+      const rem = t.closest('[data-action="remove"]');
+      if (rem) removeFromCart(+rem.dataset.id);
+
+      // Qty +/-
+      if (t.dataset.action === 'inc') setQty(+t.dataset.id, (state.cart.find(i=>i.id==t.dataset.id)?.qty||1) + 1);
+      if (t.dataset.action === 'dec') setQty(+t.dataset.id, (state.cart.find(i=>i.id==t.dataset.id)?.qty||1) - 1);
+    });
+
+    document.addEventListener("input", (e) => {
+      const t = e.target;
+      if (t.id === "q") { state.q = t.value; renderProducts(); }
+      if (t.id === "price") { state.price = +t.value; $("#priceVal").textContent = `$${t.value}`; renderProducts(); }
+      if (t.matches('.qty input')) setQty(+t.dataset.id, +t.value);
+    });
+
+    $("#category").addEventListener("change", e => { state.category = e.target.value; renderProducts(); });
+    $("#sort").addEventListener("change", e => { state.sort = e.target.value; renderProducts(); });
+
+    // Init
+    renderProducts();
+    updateCartUI();
+  </script>
+</body>
+</html>
